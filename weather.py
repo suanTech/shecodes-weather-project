@@ -24,7 +24,8 @@ def convert_date(iso_string):
     Returns:
         A date formatted like: Weekday Date Month Year e.g. Tuesday 06 July 2021
     """
-    pass
+    date = datetime.fromisoformat(iso_string)
+    return date.strftime('%A %d %B %Y')
 
 
 def convert_f_to_c(temp_in_farenheit):
@@ -35,7 +36,8 @@ def convert_f_to_c(temp_in_farenheit):
     Returns:
         A float representing a temperature in degrees celcius, rounded to 1dp.
     """
-    pass
+    temp_in_celcius = (float(temp_in_farenheit) - 32) * 5/9
+    return round(temp_in_celcius, 1)
 
 
 def calculate_mean(weather_data):
@@ -46,7 +48,11 @@ def calculate_mean(weather_data):
     Returns:
         A float representing the mean value.
     """
-    pass
+    total_value = 0
+    for i in range(len(weather_data)):
+        total_value += float(weather_data[i])
+    return total_value / len(weather_data)
+    
 
 
 def load_data_from_csv(csv_file):
@@ -57,7 +63,16 @@ def load_data_from_csv(csv_file):
     Returns:
         A list of lists, where each sublist is a (non-empty) line in the csv file.
     """
-    pass
+    rows = []
+    with open(csv_file, newline='') as f:
+        reader = csv.reader(f)
+        header = next(reader)
+        for row in reader:
+            date = row[0]
+            min_temp = int(row[1])
+            max_temp = int(row[2])
+            rows.append([date, min_temp, max_temp])
+    return rows
 
 
 def find_min(weather_data):
@@ -68,7 +83,17 @@ def find_min(weather_data):
     Returns:
         The minium value and it's position in the list.
     """
-    pass
+    if len(weather_data) > 0:
+        min_value = min(weather_data)
+        min_positions = []
+        for i in range(len(weather_data)):
+            if weather_data[i] == min_value:
+                min_positions.append(i)
+        
+        return float(min(weather_data)), max(min_positions)
+    else:
+        return ()
+
 
 
 def find_max(weather_data):
@@ -79,9 +104,18 @@ def find_max(weather_data):
     Returns:
         The maximum value and it's position in the list.
     """
-    pass
+    if len(weather_data) > 0:
+        max_value = max(weather_data)
+        max_positions = []
+        for i in range(len(weather_data)):
+            if weather_data[i] == max_value:
+                max_positions.append(i)
+        
+        return float(max(weather_data)), max(max_positions)
+    else:
+        return ()
 
-
+# how to???
 def generate_summary(weather_data):
     """Outputs a summary for the given weather data.
 
@@ -90,7 +124,26 @@ def generate_summary(weather_data):
     Returns:
         A string containing the summary information.
     """
-    pass
+    all_min_temp = []
+    all_max_temp = []
+    for i in range(len(weather_data)):
+            all_min_temp.append(weather_data[i][1]) 
+            all_max_temp.append(weather_data[i][2])
+    days_count = len(weather_data)
+    min_value = find_min(all_min_temp)
+    min_temp = convert_f_to_c(min_value[0])
+    min_pos = min_value[1]
+    min_day = convert_date(weather_data[min_pos][0])
+    max_value = find_max(all_max_temp)
+    max_temp = convert_f_to_c(max_value[0])
+    max_pos = max_value[1]
+    max_day = convert_date(weather_data[max_pos][0])
+    summary = f"{days_count} Day Overview\n"
+    summary += f"  The lowest temperature will be {min_temp}°C, and will occur on {min_day}.\n"
+    summary += f"  The highest temperature will be {max_temp}°C, and will occur on {max_day}.\n"
+    summary += f"  The average low this week is {convert_f_to_c(calculate_mean(all_min_temp))}°C.\n"
+    summary += f"  The average high this week is {convert_f_to_c(calculate_mean(all_max_temp))}°C.\n"
+    return summary
 
 
 def generate_daily_summary(weather_data):
@@ -101,4 +154,9 @@ def generate_daily_summary(weather_data):
     Returns:
         A string containing the summary information.
     """
-    pass
+    summary = ""
+    for data in weather_data:
+        summary += f"---- {convert_date(data[0])} ----\n"
+        summary += f"  Minimum Temperature: {convert_f_to_c(data[1])}°C\n"
+        summary += f"  Maximum Temperature: {convert_f_to_c(data[2])}°C\n\n"
+    return summary
