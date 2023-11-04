@@ -48,12 +48,12 @@ def calculate_mean(weather_data):
     Returns:
         A float representing the mean value.
     """
-    total_value = 0
-    for i in range(len(weather_data)):
-        total_value += float(weather_data[i])
-    return total_value / len(weather_data)
+    # for i in range(len(weather_data)):
+    #     total_value += float(weather_data[i])
+    total = sum([float(num) for num in weather_data])
+        
+    return total / len(weather_data)
     
-
 
 def load_data_from_csv(csv_file):
     """Reads a csv file and stores the data in a list.
@@ -66,7 +66,8 @@ def load_data_from_csv(csv_file):
     rows = []
     with open(csv_file, newline='') as f:
         reader = csv.reader(f)
-        header = next(reader)
+        # skip header
+        next(reader)
         for row in reader:
             date = row[0]
             min_temp = int(row[1])
@@ -74,6 +75,20 @@ def load_data_from_csv(csv_file):
             rows.append([date, min_temp, max_temp])
     return rows
 
+def find_last_occurence(list, value):
+    """Finds the last occurence of item in the list.
+
+    Args:
+        list: A list of numbers.
+        value: A matching item in the list.
+    Returns:
+        The last index of the matching item.
+    """
+    all_indexes = []
+    for i in range(len(list)):
+        if list[i] == value:
+            all_indexes.append(i)
+    return max(all_indexes)
 
 def find_min(weather_data):
     """Calculates the minimum value in a list of numbers.
@@ -85,16 +100,9 @@ def find_min(weather_data):
     """
     if len(weather_data) > 0:
         min_value = min(weather_data)
-        min_positions = []
-        for i in range(len(weather_data)):
-            if weather_data[i] == min_value:
-                min_positions.append(i)
-        
-        return float(min(weather_data)), max(min_positions)
+        return float(min(weather_data)), find_last_occurence(weather_data, min_value)
     else:
         return ()
-
-
 
 def find_max(weather_data):
     """Calculates the maximum value in a list of numbers.
@@ -106,16 +114,10 @@ def find_max(weather_data):
     """
     if len(weather_data) > 0:
         max_value = max(weather_data)
-        max_positions = []
-        for i in range(len(weather_data)):
-            if weather_data[i] == max_value:
-                max_positions.append(i)
-        
-        return float(max(weather_data)), max(max_positions)
+        return float(max(weather_data)), find_last_occurence(weather_data, max_value)
     else:
         return ()
-
-# how to???
+    
 def generate_summary(weather_data):
     """Outputs a summary for the given weather data.
 
@@ -124,25 +126,28 @@ def generate_summary(weather_data):
     Returns:
         A string containing the summary information.
     """
+    # Get lists of minimum and maximum temperatures
     all_min_temp = []
     all_max_temp = []
     for i in range(len(weather_data)):
-            all_min_temp.append(weather_data[i][1]) 
-            all_max_temp.append(weather_data[i][2])
+        all_min_temp.append(weather_data[i][1]) 
+        all_max_temp.append(weather_data[i][2])
+
     days_count = len(weather_data)
-    min_value = find_min(all_min_temp)
-    min_temp = convert_f_to_c(min_value[0])
-    min_pos = min_value[1]
-    min_day = convert_date(weather_data[min_pos][0])
-    max_value = find_max(all_max_temp)
-    max_temp = convert_f_to_c(max_value[0])
-    max_pos = max_value[1]
-    max_day = convert_date(weather_data[max_pos][0])
     summary = f"{days_count} Day Overview\n"
-    summary += f"  The lowest temperature will be {min_temp}°C, and will occur on {min_day}.\n"
-    summary += f"  The highest temperature will be {max_temp}°C, and will occur on {max_day}.\n"
-    summary += f"  The average low this week is {convert_f_to_c(calculate_mean(all_min_temp))}°C.\n"
-    summary += f"  The average high this week is {convert_f_to_c(calculate_mean(all_max_temp))}°C.\n"
+
+    min_temp_in_f, min_pos = find_min(all_min_temp)
+    min_day = convert_date(weather_data[min_pos][0])
+    summary += f"  The lowest temperature will be {convert_f_to_c(min_temp_in_f)}°C, and will occur on {min_day}.\n"
+
+    max_temp_in_f, max_pos = find_max(all_max_temp)
+    max_day = convert_date(weather_data[max_pos][0])
+    summary += f"  The highest temperature will be {convert_f_to_c(max_temp_in_f)}°C, and will occur on {max_day}.\n"
+
+    min_average_in_f = calculate_mean(all_min_temp)
+    max_average_in_f = calculate_mean(all_max_temp)
+    summary += f"  The average low this week is {convert_f_to_c(min_average_in_f)}°C.\n"
+    summary += f"  The average high this week is {convert_f_to_c(max_average_in_f)}°C.\n"
     return summary
 
 
